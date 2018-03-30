@@ -1,0 +1,44 @@
+---
+ - hosts: kalinux.jexia.com
+   become: true
+
+   tasks:
+   - hostname: name=kalinux.jexia.com
+
+   - lineinfile: dest=/etc/hosts line="192.168.33.11 kalinux.jexia.com" state=present
+   - lineinfile: dest=/etc/hosts line="192.168.33.10 foreman.jexia.com" state=present
+
+#####Puppet Agent######
+   - name: Install PuppetLabs release RPM for Fedora or EL derivatives
+     yum: name="{{ item }}.noarch.rpm" state=present
+     with_items:
+       - "http://yum.puppetlabs.com/puppetlabs-release-pc1-{% if ansible_distribution == 'Fedora' %}fedora{% else %}el{% endif %}-{{ ansible_distribution_version.split('.')[0] }}"
+     when: ansible_os_family == 'RedHat'
+
+   - name: Install PuppetLabs release DEB for Debian derivates
+     apt: pkg=puppet state={{ item }} update_cache=yes
+     with_items:
+       - "http://apt.puppetlabs.com/puppetlabs-release-pc1-{{ ansible_distribution_release }}.deb"
+     when: ansible_os_family == 'Debian'
+
+   - name: Install puppet via yum
+     yum: name={{ item }} state=present
+     with_items:
+       - puppet-agent
+     when: ansible_os_family == 'RedHat'
+
+   - name: Install puppet via apt
+     apt: pkg={{ item }} state=present update_cache=yes
+     with_items:
+       - puppet
+       - facter
+     when: ansible_os_family == 'Debian'
+
+   - name: Prepare Puppet Config File
+     template: src=puppet.conf dest=/etc/puppetlabs/puppet/puppet.conf owner=root group=root mode=0644
+
+   - name: Run of puppet agent
+     puppet: timeout=30
+
+   - name: Enable puppet service
+     service: name=puppet enabled=yes state=started
