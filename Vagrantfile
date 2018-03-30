@@ -11,9 +11,9 @@ Vagrant.configure("2") do |config|
     vb.cpus = 2
   end
 
-  config.vm.define "awx" do |awx|
-    awx.vm.hostname = "awx"
-    awx.vm.provision "ansible_local" do |ansible|    
+  config.vm.define "foreman" do |foreman|
+    foreman.vm.hostname = "foreman"
+    foreman.vm.provision "ansible_local" do |ansible|    
       ansible.playbook = "playbook.yml"
       ansible.install_mode = "pip"
       ansible.version = "2.4.2.0"
