@@ -1,0 +1,6 @@
+# Install sshpass in ubuntu
+sudo apt-get install sshpass
+
+# Run playbook remotely using vagrant password
+ansible-playbook -i "foreman.lab.local," -u vagrant --ask-pass --become playbook.yml
+
